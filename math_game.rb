@@ -31,9 +31,12 @@
 
 require 'colorize'
 
-class Player
-  attr_accessor :name, :live, :score, :turn
 
+
+class Player
+  class InvalidGuessError < StandardError; end
+
+  attr_accessor :name, :live, :score, :turn
   def initialize (name)
     @name = name
     @live = 3
@@ -64,8 +67,6 @@ class Player
 
 end
 
-
-
 @question = []
 
 def generate_question
@@ -75,9 +76,13 @@ def generate_question
 end
 
 def prompt_player_for_answer
-  print @player1.turn == 1 ? @player1.name : @player2.name
-  print ", What is your answer? "
-  gets.chomp.to_i
+  loop do 
+    # raise Player::InvalidGuessError, "Invalid input! Enter integer only."
+    print @player1.turn == 1 ? @player1.name : @player2.name
+    print ", What is your answer? "
+    answer = gets.chomp
+    return answer.to_i if answer.match(/^\d+$/)
+  end
 end
 
 def answer_correct?(answer)
@@ -85,10 +90,16 @@ def answer_correct?(answer)
 end
 
 def init_players
-  print 'What\'s your name? (Player#1) '
-  @player1 = Player.new(gets.chomp)
-  print 'What\'s your name? (Player#2) '
-  @player2 = Player.new(gets.chomp)
+  loop do
+    print 'What\'s your name? (Player#1) '
+    @player1 = Player.new(gets.chomp)
+    break unless @player1.name.empty?
+  end
+  loop do
+    print 'What\'s your name? (Player#2) '
+    @player2 = Player.new(gets.chomp)
+    break unless @player2.name.empty?
+  end
 =begin
   player1 = Player.new
   print 'What\'s your name? (Player#1) '
@@ -142,6 +153,7 @@ def play_game
     @player2.revive
     break unless replay == 'y'
   end
+
 end
 
 play_game
